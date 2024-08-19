@@ -5,7 +5,7 @@ Plans are to make it display interesting statistics about a chosen player's MR. 
 
 As of right now, this project is very unfinished. But you can try running it yourself, or click [here](https://github.com/user-attachments/assets/a1449e8f-551d-4486-a277-01d8601f21fc) for a demo!
 
-
+Note that if you are running it yourself, you will need to add a Capcom account email address and password, as the information on streetfighter.com cannot be accessed without an account linked to the game.
 
 
 
