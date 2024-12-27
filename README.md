@@ -1,2 +1,2 @@
 # SF6Scraper
-Site for retrieving and visualizing Street Fighter 6 match data.
+(Future) Open source web application for scraping and displaying Street Fighter 6 profile data from streetfighter.com/6/buckler/.  Plans are to make it display interesting statistics about a chosen player's MR. Including MR history shown with a line graph, MR win loss ratio against each character, ect...  As of right now, this project is very unfinished. But you can try running it yourself using the code provided.  Note that if you are running it yourself, you will need to add a Capcom account email address and password, as the information on streetfighter.com cannot be accessed without an account linked to the game.
