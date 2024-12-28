@@ -1,7 +1,7 @@
 def scrapesite(user_input):
     from playwright.sync_api import sync_playwright
     import mysql.connector
-    import userpasswords #This file contains the username and password for the CAPCOM account. (Buckler's Bootcamp)
+    import userpasswords  # This file contains the username and password for the CAPCOM account. (Buckler's Bootcamp)
 
     with sync_playwright() as p:
         user_URL = f"https://www.streetfighter.com/6/buckler/auth/loginep?redirect_url=/profile/{user_input}/battlelog/rank"
@@ -11,75 +11,75 @@ def scrapesite(user_input):
         page = context.new_page()
 
         page.goto(user_URL)
-    
+
         # Enter country, date of birth, and click submit
-        dropdown = page.locator("select[id='country']")            
+        dropdown = page.locator("select[id='country']")
         dropdown.select_option("United States")
-        page.locator("select[id='birthYear']").select_option('2000') 
+        page.locator("select[id='birthYear']").select_option('2000')
         page.locator("select[id='birthMonth']").select_option('12')
         page.locator("select[id='birthDay']").select_option('25')
-        page.locator("button[name='submit']").click()    
-    
-        # Enter username and password click submit
+        page.locator("button[name='submit']").click()
+
+        # Enter username and password and click submit
         email_field = page.locator("input[type='email']")
-        
-        #ENTER EMAIL HERE
         email_field.fill(userpasswords.emailfill)
         pw_field = page.locator("input[type='password']")
-
-        #ENTER PASSWORD HERE
         pw_field.fill(userpasswords.passwordfill)
         page.locator("button[name='submit']").click()
-    
-        # Wait for the page to load and navigate to the profile
+
+        # Wait for the page to load
         page.wait_for_timeout(8000)
-    
-        # Get MR data and convert it all to integers
-        battle_data = page.locator("li.battle_data_lp__6v5G9").all_text_contents()
-        battle_data = [int(data.replace(' MR', '')) for data in battle_data]
-
-        # Gets character data through the character images alt text
-        images = page.locator("p.battle_data_character__Mnj8l img")
-        character_data = [img.get_attribute("alt") for img in images.all()]
-
-        # Get Names of each player
-        name_data = page.locator("span.battle_data_name__IPyjF").all_text_contents()
-
-        # Gets winner of match through the player 1 side win/lose image
-        win_data_raw = page.locator("li.battle_data_player_1__LemvG").all_text_contents()
-        # [wins, loses, wins]
-        # name data = match1[stingrays, fixcheese] match2[stingrays, otherguy]
-
-        # If player1 has "Wins" at the current index, they're the winner
-        win_data = []
-        othervariable = 0
-        print("Win Data Raw" + str(win_data_raw))
-        for i in range(0, len(win_data_raw)):
-            if win_data_raw[i] == "WINS":
-                win_data.append(name_data[othervariable])   # player1
-            else:
-                win_data.append(name_data[othervariable + 1])  # player2
-            othervariable += 2
-        print("Win Data After" + str(win_data))
-        username = page.locator("span.status_name__gXNo9").all_text_contents()[0]
-        browser.close()
 
         mydb = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="sf6scraper"
+            host="localhost",
+            user="root",
+            password="",
+            database="sf6scraper"
         )
         mycursor = mydb.cursor()
-        
-        for i in range(0, len(battle_data), 2):
-            mycursor.execute(
-                "INSERT INTO matches (player1_username, player2_username, player1_character, player2_character, player1_mr, player2_mr, winner, player_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-                (name_data[i], name_data[i+1], character_data[i], character_data[i+1], battle_data[i], battle_data[i+1], win_data[i//2], user_input)
-            )
+
+        while True:
+            # Scrape data from the current page
+            battle_data = page.locator("li.battle_data_lp__6v5G9").all_text_contents()
+            battle_data = [int(data.replace(' MR', '')) for data in battle_data]
+
+            images = page.locator("p.battle_data_character__Mnj8l img")
+            character_data = [img.get_attribute("alt") for img in images.all()]
+
+            name_data = page.locator("span.battle_data_name__IPyjF").all_text_contents()
+
+            win_data_raw = page.locator("li.battle_data_player_1__LemvG").all_text_contents()
+            win_data = []
+            othervariable = 0
+            for i in range(0, len(win_data_raw)):
+                if win_data_raw[i] == "WINS":
+                    win_data.append(name_data[othervariable])  # player1
+                else:
+                    win_data.append(name_data[othervariable + 1])  # player2
+                othervariable += 2
+
+            # Insert data into the database
+            for i in range(0, len(battle_data), 2):
+                mycursor.execute(
+                    "INSERT INTO matches (player1_username, player2_username, player1_character, player2_character, player1_mr, player2_mr, winner, player_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                    (name_data[i], name_data[i + 1], character_data[i], character_data[i + 1], battle_data[i], battle_data[i + 1], win_data[i // 2], user_input)
+                )
             mydb.commit()
+
+            # Check if the "Next" button is enabled
+            next_button = page.locator("li.next")
+            if next_button.is_disabled():
+                break
+            next_button.click()
+            page.wait_for_timeout(3000)  # Wait for the next page to load
+            browser.close()
+
+        # Insert user data
+        username = page.locator("span.status_name__gXNo9").all_text_contents()[0]
         mycursor.execute(
-                "INSERT INTO users (player_id, username) VALUES (%s, %s)",
-                (user_input, username)
-            )
+            "INSERT INTO users (player_id, username) VALUES (%s, %s)",
+            (user_input, username)
+        )
         mydb.commit()
+
+        browser.close()

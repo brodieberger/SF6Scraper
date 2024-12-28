@@ -16,7 +16,7 @@
 
 <body>
     <div class="row p-3">
-        <div class="col-lg-4">
+        <div class="col-lg-8">
             <h1>Street Fighter Profile Scraper</h1>
             <h5>Created by Stingrays110</h5>
 
@@ -27,6 +27,8 @@
                         <th>Player 2</th>
                         <th>Player 1 MR</th>
                         <th>Player 2 MR</th>
+                        <th>Player 1 Character</th>
+                        <th>Player 2 Character</th>
                         <th>Winner</th>
                         <th>Match Date</th>
                     </tr>
@@ -38,6 +40,8 @@
                         <td>{{ match.player2_username }}</td>
                         <td>{{ match.player1_mr }}</td>
                         <td>{{ match.player2_mr }}</td>
+                        <td>{{ match.player1_character }}</td>
+                        <td>{{ match.player2_character }}</td>
                         <td>{{ match.winner }}</td>
                         <td>{{ match.match_date }}</td>
                     </tr>
