@@ -38,12 +38,29 @@ def scrapesite(user_input):
         battle_data = page.locator("li.battle_data_lp__6v5G9").all_text_contents()
         battle_data = [int(data.replace(' MR', '')) for data in battle_data]
 
+        # Gets character data through the character images alt text
+        images = page.locator("p.battle_data_character__Mnj8l img")
+        character_data = [img.get_attribute("alt") for img in images.all()]
+
         # Get Names of each player
         name_data = page.locator("span.battle_data_name__IPyjF").all_text_contents()
 
-        # Print or return the scraped data
-        data_amount = len(battle_data)
-    
+        # Gets winner of match through the player 1 side win/lose image
+        win_data_raw = page.locator("li.battle_data_player_1__LemvG").all_text_contents()
+        # [wins, loses, wins]
+        # name data = match1[stingrays, fixcheese] match2[stingrays, otherguy]
+
+        # If player1 has "Wins" at the current index, they're the winner
+        win_data = []
+        othervariable = 0
+        print("Win Data Raw" + str(win_data_raw))
+        for i in range(0, len(win_data_raw)):
+            if win_data_raw[i] == "WINS":
+                win_data.append(name_data[othervariable])   # player1
+            else:
+                win_data.append(name_data[othervariable + 1])  # player2
+            othervariable += 2
+        print("Win Data After" + str(win_data))
         username = page.locator("span.status_name__gXNo9").all_text_contents()[0]
         browser.close()
 
@@ -55,10 +72,14 @@ def scrapesite(user_input):
         )
         mycursor = mydb.cursor()
         
-        for i in range(0, data_amount, 2):
-            #current_data=(str(name_data[i]) + " (" + str(battle_data[i]) + "MR) VS " + str(name_data[i+1]) + "(" + str(battle_data[i+1]) + "MR)")
+        for i in range(0, len(battle_data), 2):
             mycursor.execute(
-                "INSERT INTO matches (player1_username, player2_username, player1_mr, player2_mr, winner, player_id) VALUES (%s, %s, %s, %s, %s, %s)",
-                (name_data[i], name_data[i+1], battle_data[i], battle_data[i+1],'Temp Player', user_input)  # TODO, get winner logic
+                "INSERT INTO matches (player1_username, player2_username, player1_character, player2_character, player1_mr, player2_mr, winner, player_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                (name_data[i], name_data[i+1], character_data[i], character_data[i+1], battle_data[i], battle_data[i+1], win_data[i//2], user_input)
             )
             mydb.commit()
+        mycursor.execute(
+                "INSERT INTO users (player_id, username) VALUES (%s, %s)",
+                (user_input, username)
+            )
+        mydb.commit()
