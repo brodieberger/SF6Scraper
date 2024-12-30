@@ -71,13 +71,16 @@ def scrapesite(user_input):
                 )
             mydb.commit()
 
-            # Check if the "Next" button is enabled
-            next_button = page.locator("li.next")
-            if next_button.is_disabled():
+            try:
+                next_button = page.locator("li.next")
+                if "disabled" in next_button.get_attribute("class"):
+                    break
+                next_button.click()
+                page.wait_for_timeout(3000)  # Wait for the next page to load
+            except Exception as e:
+                print(f"Error navigating to the next page: {e}")
                 break
-            next_button.click()
-            page.wait_for_timeout(3000)  # Wait for the next page to load
-            browser.close()
+
 
         # Insert user data
         username = page.locator("span.status_name__gXNo9").all_text_contents()[0]

@@ -16,13 +16,13 @@
 </head>
 
 <body>
-    <div class="container p-3">
+    <div class="container-fluid p-3">
         <h1>Street Fighter Profile Scraper</h1>
         <h5>Created by Stingrays110</h5>
 
         <div class="row">
             <!-- First Chart/Table -->
-            <div class="col-6" id="tablechart">
+            <div class="col-xl-12 col-xxl-6" id="tablechart">
                 <table class="table">
                     <thead>
                         <tr>
@@ -37,7 +37,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for match in matches %}
+                        {% for match in matches[:25] %}
                         <tr>
                             <td>{{ match.player1_username }}</td>
                             <td>{{ match.player2_username }}</td>

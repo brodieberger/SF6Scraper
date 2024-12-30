@@ -1,54 +1,60 @@
-// Wait for the DOM to fully load
 document.addEventListener("DOMContentLoaded", function () {
-    // Get the canvas element
-    const ctx = document.getElementById('mrLineChart').getContext('2d');
+    const playerId = window.location.pathname.split('/').pop(); // Extract player_id from URL
 
-    // Static data for the chart
-    const labels = ['Game 1', 'Game 2', 'Game 3', 'Game 4', 'Game 5'];
-    const dataPoints = [1500, 1520, 1540, 1510, 1530];
+    // Fetch data from the server for the player ID
+    fetch(`/data/${playerId}/line_chart`)
+    .then(response => response.json())
+    .then(data => {
+        console.log("Line Chart Data:", data);
+            // Parse and process data for Chart.js
+            const labels = data.map(match => match.id); // Replace `match_date` with actual date field
+            const mrData = data.map(match => match.mr); // Replace `mr` with actual MR field
 
-    // Create a new line chart
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Player MR',
-                data: dataPoints,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderWidth: 2,
-                tension: 0.2,
-                pointStyle: 'circle',
-                pointRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
+            // Render Chart.js chart
+            const ctx = document.getElementById('mrLineChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Player MR',
+                        data: mrData,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.2,
+                        pointStyle: 'circle',
+                        pointRadius: 5
+                    }]
                 },
-                title: {
-                    display: true,
-                    text: 'Player MR Over 5 Games'
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Games'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'MR'
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: `Player ${playerId} MR`
+                        }
                     },
-                    beginAtZero: false
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Match ID'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'MR'
+                            },
+                            beginAtZero: false
+                        }
+                    }
                 }
-            }
-        }
-    });
+            });
+        })
+        .catch(error => console.error("Error fetching player data:", error));
 });
