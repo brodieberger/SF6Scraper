@@ -38,16 +38,21 @@ def scrapesite(user_input):
         )
         mycursor = mydb.cursor()
 
+        # Get name of selected profile
+        name_data = page.locator("span.battle_data_name__IPyjF").all_text_contents()
+        
         while True:
             # Scrape data from the current page
+
+            #MR Data
             battle_data = page.locator("li.battle_data_lp__6v5G9").all_text_contents()
             battle_data = [int(data.replace(' MR', '')) for data in battle_data]
 
+            #Get character data by using the image alt text
             images = page.locator("p.battle_data_character__Mnj8l img")
             character_data = [img.get_attribute("alt") for img in images.all()]
 
-            name_data = page.locator("span.battle_data_name__IPyjF").all_text_contents()
-
+            # Get winner of player one, super spaghetti code here
             win_data_raw = page.locator("li.battle_data_player_1__LemvG").all_text_contents()
             win_data = []
             othervariable = 0
@@ -58,7 +63,7 @@ def scrapesite(user_input):
                     win_data.append(name_data[othervariable + 1])  # player2
                 othervariable += 2
 
-            # Insert data into the database
+            # Insert data into the database TODO: get date
             for i in range(0, len(battle_data), 2):
                 mycursor.execute(
                     "INSERT INTO matches (player1_username, player2_username, player1_character, player2_character, player1_mr, player2_mr, winner, player_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
