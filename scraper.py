@@ -37,12 +37,12 @@ def scrapesite(user_input):
             database="sf6scraper"
         )
         mycursor = mydb.cursor()
-
-        # Get name of selected profile
-        name_data = page.locator("span.battle_data_name__IPyjF").all_text_contents()
         
         while True:
             # Scrape data from the current page
+
+            # Get username of both players
+            name_data = page.locator("span.battle_data_name__IPyjF").all_text_contents()
 
             #MR Data
             battle_data = page.locator("li.battle_data_lp__6v5G9").all_text_contents()
