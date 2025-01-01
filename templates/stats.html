@@ -22,38 +22,6 @@
         <h5>Welcome {{username}}, you have played {{matchcount}} matches</h5>
 
         <div class="row">
-            <!-- First Chart/Table -->
-            <div class="col-xl-12 col-xxl-6" id="tablechart">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Player 1</th>
-                            <th>Player 2</th>
-                            <th>Player 1 MR</th>
-                            <th>Player 2 MR</th>
-                            <th>Player 1 Character</th>
-                            <th>Player 2 Character</th>
-                            <th>Winner</th>
-                            <th>ID</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for match in matches[:25] %}
-                        <tr>
-                            <td>{{ match.player1_username }}</td>
-                            <td>{{ match.player2_username }}</td>
-                            <td>{{ match.player1_mr }}</td>
-                            <td>{{ match.player2_mr }}</td>
-                            <td>{{ match.player1_character }}</td>
-                            <td>{{ match.player2_character }}</td>
-                            <td>{{ match.winner }}</td>
-                            <td>{{ match.id }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
             <!-- Chart.js Line Chart -->
             <div class="col-xl-12 col-xxl-6" style="text-align: center;">
                 <h5>Average MR over 100 matches: {{avgmr_100}}</h5>
