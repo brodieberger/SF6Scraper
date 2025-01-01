@@ -42,7 +42,7 @@ def index():
     return render_template("index.html")
 
 #Loads template for user display
-@app.route("/results/<player_id>")
+@app.route("/stats/<player_id>")
 def results(player_id):
     # Connect to database
     mydb = mysql.connector.connect(
@@ -57,23 +57,54 @@ def results(player_id):
     mycursor.execute("SELECT * FROM matches WHERE player_id = %s", (player_id,))
     matches = mycursor.fetchall()
 
-    mycursor.execute("SELECT username, avgmr_100, avgmr_10 FROM users WHERE player_id = %s", (player_id,))
-    userdata = mycursor.fetchone()  # Fetch one row as a dictionary
+    mycursor.execute("SELECT * FROM users WHERE player_id = %s", (player_id,))
+    userdata = mycursor.fetchone()
 
     if userdata:
         username = userdata['username']
         avgmr_100 = userdata['avgmr_100']
         avgmr_10 = userdata['avgmr_10']
+        matchcount = userdata['matchcount']
     else:
         username = None
         avgmr_100 = None
         avgmr_10 = None
+        matchcount = None
 
     if not userdata:
         flash("No matches found for the player.")
         return redirect(url_for("index"))
     
-    return render_template('results.html', matches=matches, username=username, avgmr_100=avgmr_100, avgmr_10=avgmr_10)
+    return render_template('stats.html', matches=matches, username=username, avgmr_100=avgmr_100, avgmr_10=avgmr_10, matchcount=matchcount)
+
+#Loads template for user display
+@app.route("/characters/<player_id>")
+def characters(player_id):
+    # Connect to database
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="sf6scraper"
+    )
+    mycursor = mydb.cursor(dictionary=True)
+    
+    # Query matches for the player
+    mycursor.execute("SELECT * FROM users WHERE player_id = %s", (player_id,))
+    userdata = mycursor.fetchone()
+
+    if userdata:
+        username = userdata['username']
+        matchcount = userdata['matchcount']
+    else:
+        username = None
+        matchcount = None
+
+    if not userdata:
+        flash("No matches found for the player.")
+        return redirect(url_for("index"))
+    
+    return render_template('characters.html', username=username, matchcount=matchcount)
 
 # Format JSON stuff for AJAX
 @app.route('/data/<player_id>/<query_type>')
@@ -107,33 +138,35 @@ def get_data(player_id, query_type):
         ORDER BY id desc;
         """
         mycursor.execute(query, (player_id, player_id, player_id))
-
     elif query_type == "pie_chart":
-        query = """
-        SELECT player1_character AS character, COUNT(*) AS count 
-        FROM matches 
-        WHERE player_id = %s 
-        GROUP BY player1_character;
-        """
-        mycursor.execute(query, (player_id,))
-    elif query_type == "averages":
         query = """
         WITH resolved_username AS (
             SELECT username
             FROM users
-            WHERE player_id = 1711733433
-        )
-        SELECT 
-            AVG(
+            WHERE player_id = %s
+        ),
+        limited_matches AS (
+            SELECT *
+            FROM matches
+            WHERE 
+                player1_username = (SELECT username FROM resolved_username)
+                OR player2_username = (SELECT username FROM resolved_username)
+            ORDER BY id ASC
+            LIMIT 100
+        ),
+        opponent_characters AS (
+            SELECT 
                 CASE 
-                    WHEN m.player1_username = (SELECT username FROM resolved_username) THEN m.player1_mr
-                    WHEN m.player2_username = (SELECT username FROM resolved_username) THEN m.player2_mr
-                END
-            ) AS avg_mr
-        FROM matches m
-        WHERE 
-            m.player1_username = (SELECT username FROM resolved_username)
-            OR m.player2_username = (SELECT username FROM resolved_username);
+                    WHEN m.player1_username = (SELECT username FROM resolved_username) THEN m.player2_character
+                    WHEN m.player2_username = (SELECT username FROM resolved_username) THEN m.player1_character
+                END AS opponent_character
+            FROM limited_matches m
+        )
+        SELECT opponent_character, COUNT(*) AS count
+        FROM opponent_characters
+        WHERE opponent_character IS NOT NULL
+        GROUP BY opponent_character
+        ORDER BY count DESC;
         """
         mycursor.execute(query, (player_id,))
     else:
