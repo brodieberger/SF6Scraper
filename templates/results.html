@@ -19,6 +19,7 @@
     <div class="container-fluid p-3">
         <h1>Street Fighter Profile Scraper</h1>
         <h5>Created by Stingrays110</h5>
+        <h5>Welcome {{username}}</h5>
 
         <div class="row">
             <!-- First Chart/Table -->
@@ -54,7 +55,9 @@
             </div>
 
             <!-- Chart.js Line Chart -->
-            <div class="col-xl-12 col-xxl-6">
+            <div class="col-xl-12 col-xxl-6" style="text-align: center;">
+                <h5>Average MR over 100 matches: {{avgmr_100}}</h5>
+                <h5>Average MR over 10 matches: {{avgmr_10}}</h5>
                 <canvas id="mrLineChart"></canvas>
             </div>
         </div>

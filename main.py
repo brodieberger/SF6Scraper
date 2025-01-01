@@ -56,12 +56,24 @@ def results(player_id):
     # Query matches for the player
     mycursor.execute("SELECT * FROM matches WHERE player_id = %s", (player_id,))
     matches = mycursor.fetchall()
-    
-    if not matches:
+
+    mycursor.execute("SELECT username, avgmr_100, avgmr_10 FROM users WHERE player_id = %s", (player_id,))
+    userdata = mycursor.fetchone()  # Fetch one row as a dictionary
+
+    if userdata:
+        username = userdata['username']
+        avgmr_100 = userdata['avgmr_100']
+        avgmr_10 = userdata['avgmr_10']
+    else:
+        username = None
+        avgmr_100 = None
+        avgmr_10 = None
+
+    if not userdata:
         flash("No matches found for the player.")
         return redirect(url_for("index"))
-
-    return render_template("results.html", player_id=player_id, matches=matches)
+    
+    return render_template('results.html', matches=matches, username=username, avgmr_100=avgmr_100, avgmr_10=avgmr_10)
 
 # Format JSON stuff for AJAX
 @app.route('/data/<player_id>/<query_type>')
@@ -87,14 +99,14 @@ def get_data(player_id, query_type):
         )
         SELECT m.id, m.player1_mr AS mr
         FROM matches m
-        WHERE m.player1_username = (SELECT username FROM resolved_username)
+        WHERE m.player1_username = (SELECT username FROM resolved_username) and player_id = %s
         UNION
         SELECT m.id, m.player2_mr AS mr
         FROM matches m
-        WHERE m.player2_username = (SELECT username FROM resolved_username)
+        WHERE m.player2_username = (SELECT username FROM resolved_username) and player_id = %s
         ORDER BY id desc;
         """
-        mycursor.execute(query, (player_id,))  # Corrected to pass a tuple
+        mycursor.execute(query, (player_id, player_id, player_id))
 
     elif query_type == "pie_chart":
         query = """
@@ -103,7 +115,27 @@ def get_data(player_id, query_type):
         WHERE player_id = %s 
         GROUP BY player1_character;
         """
-        mycursor.execute(query, (player_id,))  # Corrected to pass a tuple
+        mycursor.execute(query, (player_id,))
+    elif query_type == "averages":
+        query = """
+        WITH resolved_username AS (
+            SELECT username
+            FROM users
+            WHERE player_id = 1711733433
+        )
+        SELECT 
+            AVG(
+                CASE 
+                    WHEN m.player1_username = (SELECT username FROM resolved_username) THEN m.player1_mr
+                    WHEN m.player2_username = (SELECT username FROM resolved_username) THEN m.player2_mr
+                END
+            ) AS avg_mr
+        FROM matches m
+        WHERE 
+            m.player1_username = (SELECT username FROM resolved_username)
+            OR m.player2_username = (SELECT username FROM resolved_username);
+        """
+        mycursor.execute(query, (player_id,))
     else:
         return jsonify({"error": "Invalid query type"}), 400
 

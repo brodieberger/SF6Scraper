@@ -1,6 +1,7 @@
 def scrapesite(user_input):
     from playwright.sync_api import sync_playwright
     import mysql.connector
+    import usertable
     import userpasswords  # This file contains the username and password for the CAPCOM account. (Buckler's Bootcamp)
 
     with sync_playwright() as p:
@@ -89,5 +90,9 @@ def scrapesite(user_input):
             (user_input, username)
         )
         mydb.commit()
+
+        # TODO, find a better way of doing this
+        player_id = f"{user_input}"
+        usertable.update_user(player_id)
 
         browser.close()
