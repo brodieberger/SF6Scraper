@@ -52,10 +52,6 @@ def results(player_id):
         database="sf6scraper"
     )
     mycursor = mydb.cursor(dictionary=True)
-    
-    # Query matches for the player
-    mycursor.execute("SELECT * FROM matches WHERE player_id = %s", (player_id,))
-    matches = mycursor.fetchall()
 
     mycursor.execute("SELECT * FROM users WHERE player_id = %s", (player_id,))
     userdata = mycursor.fetchone()
@@ -75,9 +71,9 @@ def results(player_id):
         flash("No matches found for the player.")
         return redirect(url_for("index"))
     
-    return render_template('stats.html', matches=matches, username=username, avgmr_100=avgmr_100, avgmr_10=avgmr_10, matchcount=matchcount)
+    return render_template('stats.html', username=username, avgmr_100=avgmr_100, avgmr_10=avgmr_10, matchcount=matchcount)
 
-#Loads template for user display
+# Information about the characters you've fought
 @app.route("/characters/<player_id>")
 def characters(player_id):
     # Connect to database
@@ -105,6 +101,37 @@ def characters(player_id):
         return redirect(url_for("index"))
     
     return render_template('characters.html', username=username, matchcount=matchcount)
+
+# Information about the characters you've fought
+@app.route("/matches/<player_id>")
+def matches(player_id):
+    # Connect to database
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="sf6scraper"
+    )
+    mycursor = mydb.cursor(dictionary=True)
+    
+    mycursor.execute("SELECT * FROM users WHERE player_id = %s", (player_id,))
+    userdata = mycursor.fetchone()
+
+    mycursor.execute("SELECT * FROM matches WHERE player_id = %s", (player_id,))
+    matches = mycursor.fetchall()
+
+    if userdata:
+        username = userdata['username']
+        matchcount = userdata['matchcount']
+    else:
+        username = None
+        matchcount = None
+
+    if not userdata:
+        flash("No matches found for the player.")
+        return redirect(url_for("index"))
+    
+    return render_template('matches.html', matches=matches, username=username, matchcount=matchcount)
 
 # Format JSON stuff for AJAX
 @app.route('/data/<player_id>/<query_type>')
