@@ -133,6 +133,38 @@ def matches(player_id):
     
     return render_template('matches.html', player_id=player_id, matches=matches, username=username, matchcount=matchcount)
 
+# Information about the opponents you've fought
+@app.route("/opponents/<player_id>")
+def opponents(player_id):
+    # Connect to database
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="sf6scraper"
+    )
+    mycursor = mydb.cursor(dictionary=True)
+    
+    mycursor.execute("SELECT * FROM users WHERE player_id = %s", (player_id,))
+    userdata = mycursor.fetchone()
+
+    mycursor.execute("SELECT * FROM matches WHERE player_id = %s", (player_id,))
+    matches = mycursor.fetchall()
+
+    if userdata:
+        username = userdata['username']
+        matchcount = userdata['matchcount']
+    else:
+        username = None
+        matchcount = None
+
+    if not userdata:
+        flash("No matches found for the player.")
+        return redirect(url_for("index"))
+    
+    return render_template('opponents.html', player_id=player_id, matches=matches, username=username, matchcount=matchcount)
+
+
 # Format JSON stuff for AJAX
 @app.route('/data/<player_id>/<query_type>')
 def get_data(player_id, query_type):
