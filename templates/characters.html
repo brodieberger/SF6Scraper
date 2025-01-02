@@ -1,12 +1,16 @@
 {% extends "base.html" %}
-{% block title %} Home Page {% endblock %}
+{% block title %} Character Stats {% endblock %}
 
+{% block nav_enabled1 %}{% endblock %}
+{% block nav_enabled2 %}{% endblock %}
+{% block nav_enabled3 %}active{% endblock %}
+{% block nav_enabled4 %}{% endblock %}
 {% block content %}
 <h5>Welcome {{username}}, here are your character stats</h5>
 
 <div class="row">
     <!-- Chart.js Line Chart -->
-    <div class="col-12" style="width: 25%">
+    <div class="col-12" style="width: 50%">
         <canvas id="characterPieChart"></canvas>
     </div>
 </div>

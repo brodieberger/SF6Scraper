@@ -1,16 +1,20 @@
 {% extends "base.html" %}
 {% block title %} Home Page {% endblock %}
 
+{% block nav_enabled1 %}{% endblock %}
+{% block nav_enabled2 %}active{% endblock %}
+{% block nav_enabled3 %}{% endblock %}
+{% block nav_enabled4 %}{% endblock %}
+
 {% block content %}
 <h5>Welcome {{username}}, you have played {{matchcount}} matches</h5>
 
-<div class="row">
-    <!-- Chart.js Line Chart -->
-    <div class="col-12" style="text-align: center;">
-        <h5>Average MR over 100 matches: {{avgmr_100}}</h5>
-        <h5>Average MR over 10 matches: {{avgmr_10}}</h5>
-        <canvas id="mrLineChart"></canvas>
-    </div>
+
+<!-- Chart.js Line Chart -->
+<div class="col-12" style="text-align: center; max-height: 50vh;">
+    <h5>Average MR over 100 matches: {{avgmr_100}}</h5>
+    <h5>Average MR over 10 matches: {{avgmr_10}}</h5>
+    <canvas id="mrLineChart"></canvas>
 </div>
 
 {% endblock %}

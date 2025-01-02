@@ -71,7 +71,7 @@ def results(player_id):
         flash("No matches found for the player.")
         return redirect(url_for("index"))
     
-    return render_template('stats.html', username=username, avgmr_100=avgmr_100, avgmr_10=avgmr_10, matchcount=matchcount)
+    return render_template('stats.html', player_id=player_id, username=username, avgmr_100=avgmr_100, avgmr_10=avgmr_10, matchcount=matchcount)
 
 # Information about the characters you've fought
 @app.route("/characters/<player_id>")
@@ -100,7 +100,7 @@ def characters(player_id):
         flash("No matches found for the player.")
         return redirect(url_for("index"))
     
-    return render_template('characters.html', username=username, matchcount=matchcount)
+    return render_template('characters.html', player_id=player_id, username=username, matchcount=matchcount)
 
 # Information about the characters you've fought
 @app.route("/matches/<player_id>")
@@ -131,7 +131,7 @@ def matches(player_id):
         flash("No matches found for the player.")
         return redirect(url_for("index"))
     
-    return render_template('matches.html', matches=matches, username=username, matchcount=matchcount)
+    return render_template('matches.html', player_id=player_id, matches=matches, username=username, matchcount=matchcount)
 
 # Format JSON stuff for AJAX
 @app.route('/data/<player_id>/<query_type>')
