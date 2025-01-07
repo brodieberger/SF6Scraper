@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %} Home Page {% endblock %}
+
+{% block nav_enabled1 %}disabled{% endblock %}
+{% block nav_enabled2 %}disabled{% endblock %}
+{% block nav_enabled3 %}disabled{% endblock %}
+{% block nav_enabled4 %}disabled{% endblock %}
+
+{% block content %}
+<h5>Welcome!</h5>
+<form method="POST" action="/streetfighter/">
+    <input type="text" name="player_id" placeholder="Enter Player ID" required>
+    <button type="submit">Submit</button>
+</form>
+
+
+{% endblock %}

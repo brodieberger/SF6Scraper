@@ -78,7 +78,7 @@ def update_user(player_id):
     averageMR10 = float(result['avg_mr']) if result and result['avg_mr'] else None
 
     # Calculate avg MR over 10 games
-    mycursor.execute("SELECT count(id) as matchcount FROM `matches` WHERE player_id = '%s'", (player_id,))
+    mycursor.execute("SELECT count(id) as matchcount FROM `matches` WHERE player_id = %s", (player_id,))
     result = mycursor.fetchone()
     matchcount = float(result['matchcount']) if result and result['matchcount'] else None
 

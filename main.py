@@ -7,16 +7,22 @@ import userpasswords
 app = Flask(__name__)
 app.secret_key = userpasswords.supersecretkey
 
-#start web app
+#Street Fighter Side
 @app.route("/", methods=["GET", "POST"])
 def index():
+    return render_template("index.html")
+
+
+#Street Fighter Side
+@app.route("/streetfighter/", methods=["GET", "POST"])
+def streetfighter():
     if request.method == "POST":
         player_id = request.form.get("player_id")
         
         # Validate input
         if not player_id:
             flash("Player ID cannot be empty!")
-            return redirect(url_for("index"))
+            return redirect(url_for("streetfighter"))
         
         # Connect to database
         mydb = mysql.connector.connect(
@@ -39,10 +45,10 @@ def index():
             scrapesite(player_id)
             return redirect(url_for("results", player_id=player_id))
     
-    return render_template("index.html")
+    return render_template("streetfighter.html")
 
 #Loads template for user display
-@app.route("/stats/<player_id>")
+@app.route("/streetfighter/stats/<player_id>")
 def results(player_id):
     # Connect to database
     mydb = mysql.connector.connect(
@@ -69,12 +75,12 @@ def results(player_id):
 
     if not userdata:
         flash("No matches found for the player.")
-        return redirect(url_for("index"))
+        return redirect(url_for("streetfighter"))
     
     return render_template('stats.html', player_id=player_id, username=username, avgmr_100=avgmr_100, avgmr_10=avgmr_10, matchcount=matchcount)
 
 # Information about the characters you've fought
-@app.route("/characters/<player_id>")
+@app.route("/streetfighter/characters/<player_id>")
 def characters(player_id):
     # Connect to database
     mydb = mysql.connector.connect(
@@ -98,12 +104,12 @@ def characters(player_id):
 
     if not userdata:
         flash("No matches found for the player.")
-        return redirect(url_for("index"))
+        return redirect(url_for("streetfighter"))
     
     return render_template('characters.html', player_id=player_id, username=username, matchcount=matchcount)
 
 # Information about the characters you've fought
-@app.route("/matches/<player_id>")
+@app.route("/streetfighter/matches/<player_id>")
 def matches(player_id):
     # Connect to database
     mydb = mysql.connector.connect(
@@ -129,12 +135,12 @@ def matches(player_id):
 
     if not userdata:
         flash("No matches found for the player.")
-        return redirect(url_for("index"))
+        return redirect(url_for("streetfighter"))
     
     return render_template('matches.html', player_id=player_id, matches=matches, username=username, matchcount=matchcount)
 
 # Information about the opponents you've fought
-@app.route("/opponents/<player_id>")
+@app.route("/streetfighter/opponents/<player_id>")
 def opponents(player_id):
     # Connect to database
     mydb = mysql.connector.connect(
@@ -160,13 +166,13 @@ def opponents(player_id):
 
     if not userdata:
         flash("No matches found for the player.")
-        return redirect(url_for("index"))
+        return redirect(url_for("streetfighter"))
     
     return render_template('opponents.html', player_id=player_id, matches=matches, username=username, matchcount=matchcount)
 
 
 # Format JSON stuff for AJAX
-@app.route('/data/<player_id>/<query_type>')
+@app.route('/streetfighter/data/<player_id>/<query_type>')
 def get_data(player_id, query_type):
     import mysql.connector
 
@@ -226,6 +232,11 @@ def get_data(player_id, query_type):
         WHERE opponent_character IS NOT NULL
         GROUP BY opponent_character
         ORDER BY count DESC;
+        """
+        mycursor.execute(query, (player_id,))
+    elif query_type == "all":
+        query = """
+        select * from matches where player_id = %s;
         """
         mycursor.execute(query, (player_id,))
     else:

@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const playerId = window.location.pathname.split('/').pop(); // Extract player_id from URL
 
     // Fetch data for the line chart
-    fetch(`/data/${playerId}/line_chart`)
+    fetch(`/streetfighter/data/${playerId}/line_chart`)
         .then(response => response.json())
         .then(data => {
             console.log("Line Chart Data:", data);
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => console.error("Error fetching line chart data:", error));
 
     // Fetch data for the pie chart
-    fetch(`/data/${playerId}/pie_chart`)
+    fetch(`/streetfighter/data/${playerId}/pie_chart`)
         .then(response => response.json())
         .then(data => {
             console.log("Pie Chart Data:", data);
