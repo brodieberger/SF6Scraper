@@ -7,11 +7,18 @@ def scrapesite(user_input):
     with sync_playwright() as p:
         user_URL = f"https://www.streetfighter.com/6/buckler/auth/loginep?redirect_url=/profile/{user_input}/battlelog/rank"
 
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(
+            #remove comment for use on pythonplaywright
+            #executable_path="/usr/bin/chromium",
+            args=["--disable-gpu", "--no-sandbox", "--headless"]
+        )
+        
         context = browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
         page = context.new_page()
 
         page.goto(user_URL)
+
+        page.screenshot(path="gotoURL.png")
 
         # Enter country, date of birth, and click submit
         dropdown = page.locator("select[id='country']")
@@ -19,7 +26,11 @@ def scrapesite(user_input):
         page.locator("select[id='birthYear']").select_option('2000')
         page.locator("select[id='birthMonth']").select_option('12')
         page.locator("select[id='birthDay']").select_option('25')
+
+        page.screenshot(path="beforeclick.png")
         page.locator("button[name='submit']").click()
+
+        page.screenshot(path="afterclick.png")
 
         # Enter username and password and click submit
         email_field = page.locator("input[type='email']")
@@ -71,6 +82,15 @@ def scrapesite(user_input):
                     (name_data[i], name_data[i + 1], character_data[i], character_data[i + 1], battle_data[i], battle_data[i + 1], win_data[i // 2], user_input)
                 )
             mydb.commit()
+
+            # Try to close that annoying ass popup TODO this probably doesnt actually work yet
+            try:
+                modal_close_button = page.locator(".praise_praise_modal__UDwqK button.close") # This part is wrong, need to find the exact button prompt
+                if modal_close_button.is_visible():
+                    modal_close_button.click()
+                    page.wait_for_timeout(1000)
+            except Exception as e:
+                print(f"Error handling window: {e}")
 
             try:
                 next_button = page.locator("li.next")
