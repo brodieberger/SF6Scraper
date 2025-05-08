@@ -25,7 +25,7 @@ def streetfighter():
             return redirect(url_for("streetfighter"))
         
         # Connect to database
-        mydb = mysql.connector.connect(host="localhost",user="root",password="",database="sf6scraper")
+        mydb = mysql.connector.connect(host=userpasswords.host, user=userpasswords.user, password=userpasswords.password, database=userpasswords.database)    
         mycursor = mydb.cursor(dictionary=True)
         
         # Query for matches
@@ -46,7 +46,7 @@ def streetfighter():
 @app.route("/streetfighter/stats/<player_id>")
 def results(player_id):
     # Connect to database
-    mydb = mysql.connector.connect(host="localhost",user="root",password="",database="sf6scraper")
+    mydb = mysql.connector.connect(host=userpasswords.host, user=userpasswords.user, password=userpasswords.password, database=userpasswords.database)    
     mycursor = mydb.cursor(dictionary=True)
 
     mycursor.execute("SELECT * FROM users WHERE player_id = %s", (player_id,))
@@ -73,7 +73,7 @@ def results(player_id):
 @app.route("/streetfighter/characters/<player_id>")
 def characters(player_id):
     # Connect to database
-    mydb = mysql.connector.connect(host="localhost",user="root",password="",database="sf6scraper")
+    mydb = mysql.connector.connect(host=userpasswords.host, user=userpasswords.user, password=userpasswords.password, database=userpasswords.database)    
     mycursor = mydb.cursor(dictionary=True)
     
     # Query matches for the player
@@ -97,7 +97,7 @@ def characters(player_id):
 @app.route("/streetfighter/matches/<player_id>")
 def matches(player_id):
     # Connect to database
-    mydb = mysql.connector.connect(host="localhost",user="root",password="",database="sf6scraper")
+    mydb = mysql.connector.connect(host=userpasswords.host, user=userpasswords.user, password=userpasswords.password, database=userpasswords.database)    
     mycursor = mydb.cursor(dictionary=True)
     
     mycursor.execute("SELECT * FROM users WHERE player_id = %s", (player_id,))
@@ -123,7 +123,7 @@ def matches(player_id):
 @app.route("/streetfighter/opponents/<player_id>")
 def opponents(player_id):
     # Connect to database
-    mydb = mysql.connector.connect(host="localhost",user="root",password="",database="sf6scraper")
+    mydb = mysql.connector.connect(host=userpasswords.host, user=userpasswords.user, password=userpasswords.password, database=userpasswords.database)    
     mycursor = mydb.cursor(dictionary=True)
     
     mycursor.execute("SELECT * FROM users WHERE player_id = %s", (player_id,))
@@ -152,7 +152,7 @@ def get_data(player_id, query_type):
     import mysql.connector
 
     # Connect to the database
-    mydb = mysql.connector.connect(host="localhost",user="root",password="",database="sf6scraper")
+    mydb = mysql.connector.connect(host=userpasswords.host, user=userpasswords.user, password=userpasswords.password, database=userpasswords.database)    
     mycursor = mydb.cursor(dictionary=True)
 
     # Define queries for different chart types

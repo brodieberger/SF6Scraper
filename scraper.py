@@ -20,6 +20,8 @@ def scrapesite(user_input):
 
         page.goto(user_URL)
 
+        page.wait_for_timeout(500)
+
         # Enter username and password and click submit
         email_field = page.locator("input[type='email']")
         email_field.fill(userpasswords.emailfill)
@@ -28,14 +30,9 @@ def scrapesite(user_input):
         page.locator("button[name='submit']").click()
 
         # Wait for the page to load
-        page.wait_for_timeout(8000)
+        page.wait_for_timeout(4000)
 
-        mydb = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="",
-            database="sf6scraper"
-        )
+        mydb = mysql.connector.connect(host=userpasswords.host, user=userpasswords.user, password=userpasswords.password, database=userpasswords.database)    
         mycursor = mydb.cursor()
         
         while True:
@@ -73,12 +70,13 @@ def scrapesite(user_input):
                 )
             mydb.commit()
 
+            #Click to next page, or exit if last page.
             try:
                 next_button = page.locator("li.next")
                 if "disabled" in next_button.get_attribute("class"):
                     break
                 next_button.click()
-                page.wait_for_timeout(1000)  # Wait for the next page to load
+                page.wait_for_timeout(2000)  # Wait for the next page to load
             except Exception as e:
                 print(f"Error navigating to the next page: {e}")
                 break
