@@ -4,33 +4,21 @@ def scrapesite(user_input):
     import usertable
     import userpasswords  # This file contains the username and password for the CAPCOM account. (Buckler's Bootcamp)
 
+
+    print("Input recieved, running playwright")
     with sync_playwright() as p:
         user_URL = f"https://www.streetfighter.com/6/buckler/auth/loginep?redirect_url=/profile/{user_input}/battlelog/rank"
 
         browser = p.chromium.launch(
             #remove comment for use on pythonplaywright
             #executable_path="/usr/bin/chromium",
-            args=["--disable-gpu", "--no-sandbox", "--headless"]
+            args=["--disable-gpu", "--no-sandbox","--headless"]
         )
         
         context = browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
         page = context.new_page()
 
         page.goto(user_URL)
-
-        page.screenshot(path="gotoURL.png")
-
-        # Enter country, date of birth, and click submit
-        dropdown = page.locator("select[id='country']")
-        dropdown.select_option("United States")
-        page.locator("select[id='birthYear']").select_option('2000')
-        page.locator("select[id='birthMonth']").select_option('12')
-        page.locator("select[id='birthDay']").select_option('25')
-
-        page.screenshot(path="beforeclick.png")
-        page.locator("button[name='submit']").click()
-
-        page.screenshot(path="afterclick.png")
 
         # Enter username and password and click submit
         email_field = page.locator("input[type='email']")
@@ -56,9 +44,11 @@ def scrapesite(user_input):
             # Get username of both players
             name_data = page.locator("span.battle_data_name__IPyjF").all_text_contents()
 
-            #MR Data
+            #MR Data. Gets MR data in one string, filters out the letters MR and sets LP related values to the previous MR value, or NULL if none is available
             battle_data = page.locator("li.battle_data_lp__6v5G9").all_text_contents()
-            battle_data = [int(data.replace(' MR', '')) for data in battle_data]
+            for i in range(len(battle_data)):
+                if 'LP' in battle_data[i]:
+                    battle_data[i] = battle_data[i - 2] if i >= 2 and 'MR' in battle_data[i - 2] else None
 
             #Get character data by using the image alt text
             images = page.locator("p.battle_data_character__Mnj8l img")
@@ -83,21 +73,12 @@ def scrapesite(user_input):
                 )
             mydb.commit()
 
-            # Try to close that annoying ass popup TODO this probably doesnt actually work yet
-            try:
-                modal_close_button = page.locator(".praise_praise_modal__UDwqK button.close") # This part is wrong, need to find the exact button prompt
-                if modal_close_button.is_visible():
-                    modal_close_button.click()
-                    page.wait_for_timeout(1000)
-            except Exception as e:
-                print(f"Error handling window: {e}")
-
             try:
                 next_button = page.locator("li.next")
                 if "disabled" in next_button.get_attribute("class"):
                     break
                 next_button.click()
-                page.wait_for_timeout(3000)  # Wait for the next page to load
+                page.wait_for_timeout(1000)  # Wait for the next page to load
             except Exception as e:
                 print(f"Error navigating to the next page: {e}")
                 break
