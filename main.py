@@ -10,7 +10,7 @@ app.secret_key = userpasswords.supersecretkey
 #Portfolio Side
 @app.route("/", methods=["GET", "POST"])
 def index():
-    return render_template("index.html")
+    return redirect(url_for("streetfighter"))
 
 
 #Street Fighter Side
