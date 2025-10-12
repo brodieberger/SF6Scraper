@@ -10,11 +10,11 @@ def scrapesite(user_input):
         user_URL = f"https://www.streetfighter.com/6/buckler/auth/loginep?redirect_url=/profile/{user_input}/battlelog/rank"
 
         browser = p.chromium.launch(
+            #headless=False,
             #remove comment for use on pythonplaywright
             #executable_path="/usr/bin/chromium",
             args=["--disable-gpu", "--no-sandbox","--headless"]
         )
-        
         context = browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
         page = context.new_page()
 
@@ -38,7 +38,20 @@ def scrapesite(user_input):
         while True:
             # Scrape data from the current page
 
+            # Check for the popup
+            popup_close = page.locator("p.praise_close_btn__g70LI")
+
+            # If the popup is visible, click it
+            if popup_close.is_visible():
+                print("Popup detected, closing it...")
+                popup_close.click()
+                # Wait a short moment for animation or transition to finish
+                page.wait_for_timeout(500)
+            else:
+                print("No popup detected.")
+
             # Get username of both players
+            page.wait_for_selector("span.battle_data_name__IPyjF", timeout=15000)
             name_data = page.locator("span.battle_data_name__IPyjF").all_text_contents()
 
             #MR Data. Gets MR data in one string, filters out the letters MR and sets LP related values to the previous MR value, or NULL if none is available

@@ -1,13 +1,9 @@
 def update_user(player_id):
     import mysql.connector
+    import userpasswords
 
     # Connect to database
-    mydb = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="sf6scraper"
-    )
+    mydb = mysql.connector.connect(host=userpasswords.host, user=userpasswords.user, password=userpasswords.password, database=userpasswords.database)    
     mycursor = mydb.cursor(dictionary=True)
 
     # Fetch the username
