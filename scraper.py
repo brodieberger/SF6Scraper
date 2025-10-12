@@ -1,5 +1,6 @@
 def scrapesite(user_input):
     from playwright.sync_api import sync_playwright
+    from datetime import datetime
     import mysql.connector
     import usertable
     import userpasswords  # This file contains the username and password for the CAPCOM account. (Buckler's Bootcamp)
@@ -10,10 +11,10 @@ def scrapesite(user_input):
         user_URL = f"https://www.streetfighter.com/6/buckler/auth/loginep?redirect_url=/profile/{user_input}/battlelog/rank"
 
         browser = p.chromium.launch(
-            #headless=False,
+            headless=False,
             #remove comment for use on pythonplaywright
             #executable_path="/usr/bin/chromium",
-            args=["--disable-gpu", "--no-sandbox","--headless"]
+            #args=["--disable-gpu", "--no-sandbox","--headless"]
         )
         context = browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
         page = context.new_page()
@@ -40,12 +41,9 @@ def scrapesite(user_input):
 
             # Check for the popup
             popup_close = page.locator("p.praise_close_btn__g70LI")
-
-            # If the popup is visible, click it
             if popup_close.is_visible():
                 print("Popup detected, closing it...")
                 popup_close.click()
-                # Wait a short moment for animation or transition to finish
                 page.wait_for_timeout(500)
             else:
                 print("No popup detected.")
@@ -75,11 +73,18 @@ def scrapesite(user_input):
                     win_data.append(name_data[othervariable + 1])  # player2
                 othervariable += 2
 
+            # Get Date
+            date_data = page.locator("p.battle_data_date__f1sP6").all_text_contents()
+
             # Insert data into the database TODO: get date
             for i in range(0, len(battle_data), 2):
+                raw_date = date_data[i // 2]
+                dt = datetime.strptime(raw_date, "%m/%d/%Y %H:%M")
+                formatted_date = dt.strftime("%Y-%m-%d %H:%M:%S")
+
                 mycursor.execute(
-                    "INSERT INTO matches (player1_username, player2_username, player1_character, player2_character, player1_mr, player2_mr, winner, player_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-                    (name_data[i], name_data[i + 1], character_data[i], character_data[i + 1], battle_data[i], battle_data[i + 1], win_data[i // 2], user_input)
+                    "INSERT INTO matches (player1_username, player2_username, player1_character, player2_character, player1_mr, player2_mr, winner, match_date, player_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    (name_data[i], name_data[i + 1], character_data[i], character_data[i + 1], battle_data[i], battle_data[i + 1], win_data[i // 2], formatted_date, user_input)
                 )
             mydb.commit()
 
